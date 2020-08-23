@@ -80,9 +80,12 @@ class Chat extends Component {
         if (e.key === 'Enter') {
             
             const message = {text: e.target.value};
-            this.ws.send(JSON.stringify(message));
 
-            this.onPressEnter(e.target.value);
+            // send message to socket and update the state
+            this.ws.send(JSON.stringify(message));
+            this.onPressEnter(message.text);
+
+            document.getElementById('chat-input').value = '';
         }
             
     }
@@ -90,7 +93,7 @@ class Chat extends Component {
     render() {
         
         const { message } = this.state;
-        const messages = message.map((entry)=><Messages message = {entry} />);
+        const messages = message.map((entry, key)=><Messages message = {entry} key = {key}/>);
         
         return (
             <div className = "container-flex">
