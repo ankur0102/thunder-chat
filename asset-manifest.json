@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/thunder-chat/static/css/main.517fcb34.chunk.css",
+    "main.js": "/thunder-chat/static/js/main.4ac493f4.chunk.js",
+    "main.js.map": "/thunder-chat/static/js/main.4ac493f4.chunk.js.map",
+    "runtime-main.js": "/thunder-chat/static/js/runtime-main.2f94881b.js",
+    "runtime-main.js.map": "/thunder-chat/static/js/runtime-main.2f94881b.js.map",
+    "static/js/2.ab11f5da.chunk.js": "/thunder-chat/static/js/2.ab11f5da.chunk.js",
+    "static/js/2.ab11f5da.chunk.js.map": "/thunder-chat/static/js/2.ab11f5da.chunk.js.map",
+    "index.html": "/thunder-chat/index.html",
+    "precache-manifest.4c0ffdaff3d453c212aabea57865d760.js": "/thunder-chat/precache-manifest.4c0ffdaff3d453c212aabea57865d760.js",
+    "service-worker.js": "/thunder-chat/service-worker.js",
+    "static/css/main.517fcb34.chunk.css.map": "/thunder-chat/static/css/main.517fcb34.chunk.css.map",
+    "static/js/2.ab11f5da.chunk.js.LICENSE.txt": "/thunder-chat/static/js/2.ab11f5da.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2f94881b.js",
+    "static/js/2.ab11f5da.chunk.js",
+    "static/css/main.517fcb34.chunk.css",
+    "static/js/main.4ac493f4.chunk.js"
+  ]
+}
