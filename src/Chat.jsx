@@ -4,7 +4,7 @@ import Messages from './Messages';
 import ChatBox from './ChatBox';
 import MessageBox from './MessageBox';
 
-const URL = 'ws://6c3ce43b5086.ngrok.io'; // port is 3030
+const URL = 'wss://6c3ce43b5086.ngrok.io'; // port is 3030
 
 class Chat extends Component {
     
@@ -42,7 +42,7 @@ class Chat extends Component {
 
         const axios = require('axios');
 
-        axios.post('http://eaccb35115a3.ngrok.io/postMessage', {text:val}) //port is 8080
+        axios.post('https://eaccb35115a3.ngrok.io/postMessage', {text:val}) //port is 8080
         .then(res=>{
             console.log(res.data);
         })
