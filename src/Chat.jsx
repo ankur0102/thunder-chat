@@ -3,8 +3,10 @@ import { Component } from 'react';
 import Messages from './Messages';
 import ChatBox from './ChatBox';
 import MessageBox from './MessageBox';
+import Login from './Login';
 
-const URL = 'wss://6c3ce43b5086.ngrok.io'; // port is 3030
+//const URL = 'wss://6c3ce43b5086.ngrok.io'; // port is 3030
+const URL = 'ws://localhost:3030/';
 
 class Chat extends Component {
     
@@ -13,36 +15,67 @@ class Chat extends Component {
         super(props);
         this.state = {
             message: [],
+            userName: '',
+            toUserName: '',
         }
 
-        this.ws = new WebSocket(URL);
+        //this.ws = new WebSocket(URL);
         this.handleAccept = this.handleAccept.bind(this);
-        this.onPressEnter = this.onPressEnter.bind(this);
+        this.processMessage = this.processMessage.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.initializeSocket = this.initializeSocket.bind(this);
+        this.postMessage = this.postMessage.bind(this);
     }
 
-    onPressEnter(val) {
+    initializeSocket (userName) {
+
+        const socketURL = URL + userName;
         
-        // make a post request
-        this.handlePost(val);
+        this.ws = new WebSocket(socketURL);
 
-        this.updateState(val);
+        this.ws.onopen = () => {
+            // on connecting, do nothing but log it to the console
+            console.log('connected');
+        }
+      
+        this.ws.onmessage = evt => {
+            // on receiving a message, add it to the list of messages
+            const message = JSON.parse(evt.data);
+            this.updateState(message.text);
+        }
+      
+        this.ws.onclose = () => {
+            console.log('disconnected');
+            // automatically try to reconnect on connection loss
+            this.setState({
+              ws: new WebSocket(socketURL),
+            });
+        }
     }
 
-    updateState(val) {
+    processMessage(val) {
 
-        var { message } = this.state;
-
-        message.push(val);
-        this.setState({
-            message,
-        });
+        this.postMessage(val); // make a post request
+        this.updateState(val); //update the state
     }
 
-    handlePost(val) {
+    postMessage(val) {
 
         const axios = require('axios');
 
-        axios.post('https://eaccb35115a3.ngrok.io/postMessage', {text:val}) //port is 8080
+        const { userName, toUserName } = this.state;
+
+        const data = {
+            text : val,
+            fromUser : userName,
+            toUser: toUserName
+        };
+
+        this.ws.send(JSON.stringify(data));
+
+        // make a post request to the backend
+        //axios.post('https://eaccb35115a3.ngrok.io/postMessage', {text:val}) //port is 8080
+        axios.post('http://localhost:8080/insertMessage', data)
         .then(res=>{
             console.log(res.data);
         })
@@ -51,43 +84,74 @@ class Chat extends Component {
         });
     }
 
-    componentDidMount() {
+
+    updateState(val) {
+
+        var { message } = this.state;
+
+        const initialState = this.state;
+
+        message.push(val);
         
-        this.ws.onopen = () => {
-          // on connecting, do nothing but log it to the console
-          console.log('connected');
-        }
-    
-        this.ws.onmessage = evt => {
-          // on receiving a message, add it to the list of messages
-          const message = JSON.parse(evt.data);
-          this.updateState(message.text);
-        }
-    
-        this.ws.onclose = () => {
-          console.log('disconnected');
-          // automatically try to reconnect on connection loss
-          this.setState({
-            ws: new WebSocket(URL),
-          });
-        }
+        this.setState({
+            ...initialState,
+            message,
+        });
     }
+
 
     handleAccept (e) {
 
         console.log ("Handle Accept Invoked.");
 
         if (e.key === 'Enter') {
-            
-            const message = {text: e.target.value};
 
             // send message to socket and update the state
-            this.ws.send(JSON.stringify(message));
-            this.onPressEnter(message.text);
+            
+            this.processMessage(e.target.value);
 
             document.getElementById('chat-input').value = '';
         }
             
+    }
+
+    handleSubmit (e) {
+
+        console.log ("Submit button is clicked.");
+
+        const axios = require('axios');
+
+        const userName = document.getElementById ("login-input-username").value;
+        const password = document.getElementById ("login-input-password").value;
+        const toUserName = document.getElementById ("login-input-to").value;
+
+        console.log("username is " + userName);
+        console.log("password is " + password);
+
+        const data = { userName: userName, password: password };
+        axios.post("http://localhost:8080/authenticateUser", data)
+            .then(res => {
+
+                console.log(res);
+                
+                if(res.data.result === true) {
+
+                    console.log ("Response received successfully");
+                    
+                    this.initializeSocket (userName);
+
+                    const initialState = this.state;
+
+                    this.setState({
+                        ...initialState,
+                        userName,
+                        toUserName,
+                    });
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
     }
 
     render() {
@@ -95,14 +159,21 @@ class Chat extends Component {
         const { message } = this.state;
         const messages = message.map((entry, key)=><Messages message = {entry} key = {key}/>);
         
-        return (
-            <div className = "container-flex">
-                <div className="container text-green border-thick-green border-round-50">
-                    <MessageBox messages = {messages} />
-                    <ChatBox accept = {this.handleAccept} />
+        const { userName } = this.state;
+        var elem;
+        if (userName !== '') {
+            elem = (
+                <div className = "container-flex">
+                    <div className="container text-green border-thick-green border-round-50">
+                        <MessageBox messages = {messages} />
+                        <ChatBox accept = {this.handleAccept} />
+                    </div>
                 </div>
-            </div>            
-        );
+                ); 
+        } else {
+            elem = <Login handleSubmit = {this.handleSubmit} />
+        }
+        return elem;
     }
 }
 

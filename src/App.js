@@ -1,6 +1,6 @@
 import React from 'react';
 import Chat from './Chat';
-import './App.css';
+import './styles/App.css';
 
 function App() {
   document.body.style.background = "#000000";
