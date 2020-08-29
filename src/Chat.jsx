@@ -7,7 +7,7 @@ import Welcome from './Welcome';
 import { BrowserRouter } from 'react-router-dom';
 
 //const URL = 'wss://6c3ce43b5086.ngrok.io'; // port is 3030
-const URL = 'ws://localhost:3030/';
+const URL = 'ws://192.168.1.2:3030/';
 
 class Chat extends Component {
     
@@ -43,7 +43,7 @@ class Chat extends Component {
         this.ws.onmessage = evt => {
             // on receiving a message, add it to the list of messages
             const message = JSON.parse(evt.data);
-            this.updateState(message.text);
+            this.updateState(message);
         }
       
         this.ws.onclose = () => {
@@ -57,15 +57,7 @@ class Chat extends Component {
 
     processMessage(val) {
 
-        this.postMessage(val); // make a post request
-        this.updateState(val); //update the state
-    }
-
-    postMessage(val) {
-
-        const axios = require('axios');
-
-        const { userName, toUserName } = this.state;
+        const { userName, toUserName } = this.state; 
 
         const data = {
             text : val,
@@ -73,11 +65,19 @@ class Chat extends Component {
             toUser: toUserName
         };
 
+        this.postMessage(data); // make a post request
+        this.updateState(data); //update the state
+    }
+
+    postMessage(data) {
+
+        const axios = require('axios');
+
         this.ws.send(JSON.stringify(data));
 
         // make a post request to the backend
         //axios.post('https://eaccb35115a3.ngrok.io/postMessage', {text:val}) //port is 8080
-        axios.post('http://localhost:8080/insertMessage', data)
+        axios.post('http://192.168.1.2:8080/insertMessage', data)
         .then(res=>{
             console.log(res.data);
         })
@@ -87,13 +87,13 @@ class Chat extends Component {
     }
 
 
-    updateState(val) {
+    updateState(data) {
 
         var { message } = this.state;
 
         const initialState = this.state;
 
-        message.push(val);
+        message.push(data);
         
         this.setState({
             ...initialState,
@@ -131,7 +131,7 @@ class Chat extends Component {
         console.log("password is " + password);
 
         const data = { userName: userName, password: password };
-        axios.post("http://localhost:8080/authenticateUser", data)
+        axios.post("http://192.168.1.2:8080/authenticateUser", data)
             .then(res => {
 
                 console.log(res);
@@ -172,13 +172,13 @@ class Chat extends Component {
             fullName,
         };
 
-        axios.post("http://localhost:8080/insertUser", data)
+        axios.post("http://192.168.1.2:8080/insertUser", data)
             .then( res => {
                 console.log ("User inserted");
                 console.log (res);
 
                 this.initializeSocket (userName);
-                
+
                 this.setState({
 
                     ...initialState,
@@ -193,11 +193,11 @@ class Chat extends Component {
 
     render() {
         
-        const { message } = this.state;
-        const messages = message.map((entry, key)=><Messages message = {entry} key = {key}/>);
-        
-        const { userName } = this.state;
+        const { message, userName } = this.state;
+        const messages = message.map((entry, key)=><Messages userName={userName} message = {entry} key = {key}/>);
+
         var elem;
+
         if (userName !== '') {
             elem = (
                 <div className = "container-flex">
