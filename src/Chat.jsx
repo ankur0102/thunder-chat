@@ -3,7 +3,8 @@ import { Component } from 'react';
 import Messages from './Messages';
 import ChatBox from './ChatBox';
 import MessageBox from './MessageBox';
-import Login from './Login';
+import Welcome from './Welcome';
+import { BrowserRouter } from 'react-router-dom';
 
 //const URL = 'wss://6c3ce43b5086.ngrok.io'; // port is 3030
 const URL = 'ws://localhost:3030/';
@@ -23,6 +24,7 @@ class Chat extends Component {
         this.handleAccept = this.handleAccept.bind(this);
         this.processMessage = this.processMessage.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleSignup = this.handleSignup.bind(this);
         this.initializeSocket = this.initializeSocket.bind(this);
         this.postMessage = this.postMessage.bind(this);
     }
@@ -154,6 +156,41 @@ class Chat extends Component {
             });
     }
 
+    handleSignup() {
+
+        const axios = require('axios');
+
+        const userName = document.getElementById ("signup-username").value;
+        const password = document.getElementById ("signup-password").value;
+        const fullName = document.getElementById ("signup-fullname").value;
+        const initialState = this.state;
+        
+        console.log ("Signing up");
+        const data = {
+            userName,
+            password,
+            fullName,
+        };
+
+        axios.post("http://localhost:8080/insertUser", data)
+            .then( res => {
+                console.log ("User inserted");
+                console.log (res);
+
+                this.initializeSocket (userName);
+                
+                this.setState({
+
+                    ...initialState,
+                    userName,
+                    toUserName: "roadburner",
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
     render() {
         
         const { message } = this.state;
@@ -171,7 +208,11 @@ class Chat extends Component {
                 </div>
                 ); 
         } else {
-            elem = <Login handleSubmit = {this.handleSubmit} />
+            elem = (
+                <BrowserRouter>
+                    <Welcome handleSubmit = {this.handleSubmit} handleSignup = {this.handleSignup} />
+                </BrowserRouter>
+            );
         }
         return elem;
     }
