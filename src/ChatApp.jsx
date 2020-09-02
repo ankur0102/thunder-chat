@@ -21,9 +21,9 @@ class ChatApp extends Component {
 
     initializeWebSocket() {
         // initialize web socket here
-        const socketPath = WEB_SOCKET + this.props.userName;
+        this.socketPath = WEB_SOCKET + this.props.userName;
         
-        this.ws = new WebSocket(socketPath);
+        this.ws = new WebSocket(this.socketPath);
         
         this.ws.onopen = () => {
             console.log('connected to web socket');
@@ -43,6 +43,7 @@ class ChatApp extends Component {
 
         this.ws.onclose = () => {
             console.log ('disconnected to web socket');
+            this.ws = new WebSocket(this.socketPath);
         }
     }
 
